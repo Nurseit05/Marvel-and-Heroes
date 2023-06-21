@@ -1,14 +1,19 @@
 import { useHttp } from "../hooks/http.hook";
 
 const useMarvelService = () => {
-    const {loading, request, error, clearError} = useHttp();
+    const {loading, request, error, clearError, process, setProcess} = useHttp();
 
     const _apiBase = 'https://gateway.marvel.com:443/v1/public/';
     const _apiKey = 'apikey=efaf2a081b733ec0ef18e064fe671b94';
     const _baseOffset = 210;
 
     const getAllCharacters = async (offset = _baseOffset) => {
-        const res = await request(`${_apiBase}characters?limit=9&offset=${offset}&${_apiKey}`);
+        const res = await request(`${_apiBase}characters?orderBy=-modified&limit=9&offset=${offset}&${_apiKey}`);
+        return res.data.results.map(_transformCharacter);
+    }
+
+    const getHeroInformation = async (name) => {
+        const res = await request(`${_apiBase}characters?name=${name}&${_apiKey}`);
         return res.data.results.map(_transformCharacter);
     }
  
@@ -18,7 +23,7 @@ const useMarvelService = () => {
     }
 
     const getAllComics = async (offset = 0) => {
-        const res = await request(`${_apiBase}comics?limit=8&offset=${offset}&${_apiKey}`);
+        const res = await request(`${_apiBase}comics?orderBy=issueNumber&limit=8&offset=${offset}&${_apiKey}`);
         return res.data.results.map(_transformComics);
     }
 
@@ -48,7 +53,7 @@ const useMarvelService = () => {
     const _transformComics = (comics) => {
         return {
             id: comics.id,
-            name: comics.name,
+            title: comics.title,
             description: comics.description || "There is no description",
             pageCount: comics.pageCount ? `${comics.pageCount} p.` : "No information about the number of pages",
             thumbnail: comics.thumbnail.path + "." + comics.thumbnail.extension,
@@ -59,7 +64,11 @@ const useMarvelService = () => {
         }
     }
 
-    return {loading, error, getCharacterByName, getAllCharacters, getCharacter, clearError, getComics, getAllComics}
+    return {
+        loading, error, getCharacterByName, getAllCharacters, 
+        getCharacter, clearError, getComics, getAllComics, process,
+        setProcess, getHeroInformation
+    }
 }
 
 export default useMarvelService;
