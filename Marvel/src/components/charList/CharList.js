@@ -87,6 +87,10 @@ const CharList = (props) => {
     
     const items = renderItems(charList);
 
+    const bind = (creator, dispatch) => (...args) => {
+        dispatch(creator(...args))
+    }
+
     const errorMessage = error ? <ErrorMessage/> : null;
     const spinner = loading && !newItemLoading ? <Spinner/> : null;
 
